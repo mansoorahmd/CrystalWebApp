@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ReportsMetadata>
+	<Categories>
+		<Category name="Efficiency">
+			<Report name="BoxMaintenanceReport"
+					displayName="Box Maintenance Report"
+					description="This report provides information about box maintenance activities and status." />
+			<Report name="BundleTrackingReport"
+					displayName="Bundle Tracking Report"
+					description="This report tracks bundles through various stages of the production process." />
+			<Report name="MachineDetailsReport"
+					displayName="Machine Details Report"
+					description="This report provides detailed information about machine utilization and status." />
+			<Report name="OperationWise480Mins"
+					displayName="Operation Wise 480 Mins Report"
+					description="This report provides operation-wise analysis over an 8-hour (480 minutes) period." />
+			<Report name="OperationWiseMissing"
+					displayName="Operation Wise Missing Report"
+					description="This report identifies missing operations in the production workflow." />
+			<Report name="OperationWiseScanning"
+					displayName="Operation Wise Scanning Report"
+					description="This report analyzes scanning data by operation." />
+			<Report name="SAMCalculationReport"
+					displayName="SAM Calculation Report"
+					description="This report calculates Standard Allowed Minutes (SAM) for operations." />
+			<Report name="WorkerStrengthReport"
+					displayName="Worker Strength Report"
+					description="This report provides information about worker productivity and performance." />
+		</Category>
+		<Category name="Cutting">
+			<Report name="CuttingTagInitDetail"
+					displayName="Cutting Tag Initialization Report"
+					description="This report displays bundle-wise and part-wise tag numbers that have been initialized within a specified date range and filters." />
+			<Report name="CuttingWorkOrderDateWiseWIP"
+					displayName="Cutting Work Order Date Wise WIP Report"
+					description="This report provides a detailed view of Work-In-Progress (WIP) status for cutting operations, organized by date and work order." />
+			<Report name="CuttingWorkOrderWIP"
+					displayName="Cutting Work Order WIP Report"
+					description="This report provides a summary view of Work-In-Progress (WIP) status for cutting operations, aggregated by work order." />
+			<Report name="CuttingBundleWiseDetail"
+					displayName="Cutting Bundle Wise Detail Report"
+					description="This report provides detailed information about cutting bundles, organized by line and cutting issuance data." />
+			<Report name="CuttingDateWiseCutting"
+					displayName="Cutting Date Wise Report"
+					description="This report provides detailed information about cutting operations organized by date." />
+		</Category>
+		<Category name="Quality">
+			<Report name="QualityCheckReport"
+					displayName="Quality Check Report"
+					description="This report provides detailed information about quality checks performed on garments." />
+			<Report name="InlineRFTReport"
+					displayName="Inline RFT Report"
+					description="This report provides detailed information about inline RFT processes." />
+			<Report name="HourlyProductionEndline"
+					displayName="Hourly Production Report - Endline"
+					description="This report provides detailed information about inline RFT processes." />
+		</Category>
+	</Categories>
+</ReportsMetadata>

@@ -1,0 +1,762 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ReportQueries>
+    <Report name="CuttingTagInitDetail">
+        <query>
+            <![CDATA[
+            SELECT TagID, OrId, PO, StyleNo, CutJobID, CutNo, FLRSrNo, BundleID, BundleCode, 
+                   ColorCode, Color, SizeID, Size, CutPanelID, Panel, LineID, MachineID, 
+                   BoxID, DepartmentID, Location, LastScanTimestamp, IssuedFromCuttingAt, 
+                   ReceivedInCuttingAt, MachineCode, MachineDescription, LineCode, 
+                   LineDescription, DepartmentName, PrintedAt, PrintedBy 
+            FROM dbo.TagTrackingDetails 
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND PrintedAt &gt;= {0}</template>
+            <template name="EndDate">AND PrintedAt &lt;= {0}</template>
+            <template name="Companies">AND CompanyID IN ({0})</template>
+            <template name="Branches">AND Branch IN ({0})</template>
+            <template name="Lines">AND Line IN ({0})</template>
+            <template name="BuyMonths">AND Buymonth IN ({0})</template>
+            <template name="WorkOrders">AND OrId IN ({0})</template>
+            <template name="CutNos">AND CutNo IN ({0})</template>
+            <template name="POs">AND PO IN ({0})</template>
+            <template name="StyleNos">AND StyleNo IN ({0})</template>
+            <template name="Colors">AND Color IN ({0})</template>
+            <template name="ColorCodes">AND ColorCode IN ({0})</template>
+            <template name="Sizes">AND Size IN ({0})</template>
+            <template name="Customers">AND Customer IN ({0})</template>
+            <template name="PackStations">AND PackStation IN ({0})</template>
+            <template name="SectionCodes">AND SectionCode IN ({0})</template>
+            <template name="WorkerCodes">AND WorkerCode IN ({0})</template>
+            <template name="MachineCodes">AND MachineCode IN ({0})</template>
+            <template name="OperationDescriptions">AND OperationDescription IN ({0})</template>
+            <template name="OperationCodes">AND OperationCode IN ({0})</template>
+            <template name="MachineRounds">AND MachineRound IN ({0})</template>
+            <template name="FaultCodes">AND FaultCode IN ({0})</template>
+            <template name="Warehouses">AND Warehouse IN ({0})</template>
+            <template name="CustomerNames">AND CustomerName IN ({0})</template>
+            <template name="DepartmentDescriptions">AND DepartmentDescription IN ({0})</template>
+            <template name="DepartmentNames">AND DepartmentName IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/CuttingReports/CuttingTagInitDetail.rpt</reportPath>
+    </Report>
+
+    <Report name="CuttingWorkOrderDateWiseWIP">
+        <query>
+            <![CDATA[
+            With DistinctOrderQtys as
+            (
+            SELECT 
+             Distinct WorkOrder,PO,Buymonth, ColorCode,CustomerCode, ORderQty
+            FROM [dbo].[DataForCuttingWIP]
+            ),
+            WorkOrderGroup as
+            (
+            Select 
+            WorkORder,BuyMonth,CustomerCode,Sum (OrderQty) OrderQty
+            From DistinctOrderQtys
+            Group by WorkORder,BuyMonth,CustomerCode
+            ),
+            TillDateData as
+            (
+            Select 
+            cw.WorkOrder,cw.BuyMonth,cw.CustomerCode, isnull(CompanyId,'NCL') CompanyId,WOG.OrderQty,
+            Sum(CuttingQty) CuttingQty,
+            Sum(EmbroiderySendQty) EmbroiderySendQty,
+            Sum(EmbroideryReceivedQty) EmbroideryReceivedQty,
+            Sum(PrintingSendQty) PrintingSendQty,
+            Sum(PrintingReceivedQty) PrintingReceivedQty,
+            Sum(SewingIssuanceQty) SewingIssuanceQty
+            from 
+            [dbo].[DataForCuttingWIP] cw
+            Left Join WorkOrderGroup WOG 
+            on cw.WorkOrder = WOG.WorkOrder and cw.BuyMonth = WOG.BuyMonth and cw.CustomerCode = WOG.CustomerCode
+            Group By cw.WorkOrder,cw.BuyMonth,cw.CustomerCode,  isnull(CompanyId,'NCL'),WOG.OrderQty
+            )
+            Select 
+            cw.WorkOrder,cw.BuyMonth,cw.CustomerCode, isnull(cw.CompanyId,'NCL') CompanyId,WOG.OrderQty,
+            TDD.CuttingQty as TillDateCuttingQty,
+            TDD.EmbroiderySendQty as TillDateEmbroiderySendQty,
+            TDD.EmbroideryReceivedQty TillDateEmbroideryReceivedQty,
+            TDD.PrintingSendQty as TillDatePrintingSendQty,
+            TDD.PrintingReceivedQty as TillDatePrintingReceivedQty,
+            TDD.SewingIssuanceQty as TillDateSewingIssuanceQty,
+            Sum(cw.CuttingQty) CuttingQty,
+            Sum(cw.EmbroiderySendQty) EmbroiderySendQty,
+            Sum(cw.EmbroideryReceivedQty) EmbroideryReceivedQty,
+            Sum(cw.PrintingSendQty) PrintingSendQty,
+            Sum(cw.PrintingReceivedQty) PrintingReceivedQty,
+            Sum(cw.SewingIssuanceQty) SewingIssuanceQty
+            from 
+            [dbo].[DataForCuttingWIP] cw
+            Left Join WorkOrderGroup WOG 
+            on cw.WorkOrder = WOG.WorkOrder and cw.BuyMonth = WOG.BuyMonth and cw.CustomerCode = WOG.CustomerCode
+            Left Join TillDateData TDD 
+            on cw.WorkOrder = TDD.WorkOrder and cw.BuyMonth = TDD.BuyMonth and cw.CustomerCode = TDD.CustomerCode
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND cw.[CuttingOutDate] &gt;= {0}</template>
+            <template name="EndDate">AND cw.[CuttingOutDate] &lt;= {0}</template>
+            <template name="Companies">AND cw.[OrderCompanyID] IN ({0})</template>
+            <template name="Branches">AND cw.[Branch] IN ({0})</template>
+            <template name="Lines">AND cw.[Line] IN ({0})</template>
+            <template name="BuyMonths">AND cw.[Buymonth] IN ({0})</template>
+            <template name="WorkOrders">AND cw.[WorkOrder] IN ({0})</template>
+            <template name="CutNos">AND cw.[CutNo] IN ({0})</template>
+            <template name="POs">AND cw.[PO] IN ({0})</template>
+            <template name="StyleNos">AND cw.[StyleNo] IN ({0})</template>
+            <template name="Colors">AND cw.[Color] IN ({0})</template>
+            <template name="ColorCodes">AND cw.[ColorCode] IN ({0})</template>
+            <template name="Sizes">AND cw.[Size] IN ({0})</template>
+            <template name="Customers">AND cw.[Customer] IN ({0})</template>
+            <template name="PackStations">AND cw.[PackStation] IN ({0})</template>
+            <template name="SectionCodes">AND cw.[SectionCode] IN ({0})</template>
+            <template name="WorkerCodes">AND cw.[WorkerCode] IN ({0})</template>
+            <template name="MachineCodes">AND cw.[MachineCode] IN ({0})</template>
+            <template name="OperationDescriptions">AND cw.[OperationDescription] IN ({0})</template>
+            <template name="OperationCodes">AND cw.[OperationCode] IN ({0})</template>
+            <template name="MachineRounds">AND cw.[MachineRound] IN ({0})</template>
+            <template name="FaultCodes">AND cw.[FaultCode] IN ({0})</template>
+            <template name="Warehouses">AND cw.[Warehouse] IN ({0})</template>
+            <template name="CustomerNames">AND cw.[CustomerName] IN ({0})</template>
+            <template name="DepartmentDescriptions">AND cw.[DepartmentDescription] IN ({0})</template>
+            <template name="DepartmentNames">AND cw.[DepartmentName] IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            Group By cw.WorkOrder,cw.BuyMonth,cw.CustomerCode, isnull(cw.CompanyId,'NCL'),WOG.OrderQty
+            ,TDD.CuttingQty,TDD.EmbroiderySendQty,TDD.EmbroideryReceivedQty,TDD.PrintingSendQty,TDD.PrintingReceivedQty,TDD.SewingIssuanceQty
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/CuttingReports/CuttingWorkOrderDateWiseWIP.rpt</reportPath>
+    </Report>
+
+    <Report name="CuttingWorkOrderWIP">
+        <query>
+            <![CDATA[
+            With DistinctOrderQtys as
+            (
+            SELECT 
+             Distinct WorkOrder,PO,Buymonth, ColorCode,CustomerCode, ORderQty
+            FROM [dbo].[DataForCuttingWIP]
+            ),
+            WorkOrderGroup as
+            (
+            Select 
+            WorkORder,BuyMonth,CustomerCode,Sum (OrderQty) OrderQty
+            From DistinctOrderQtys
+            Group by WorkORder,BuyMonth,CustomerCode
+            )
+            Select 
+            cw.WorkOrder,cw.BuyMonth,cw.CustomerCode, isnull(CompanyId,'NCL') CompanyId,WOG.OrderQty,
+            Sum(CuttingQty) CuttingQty,
+            Sum(EmbroiderySendQty) EmbroiderySendQty,
+            Sum(EmbroideryReceivedQty) EmbroideryReceivedQty,
+            Sum(PrintingSendQty) PrintingSendQty,
+            Sum(PrintingReceivedQty) PrintingReceivedQty,
+            Sum(SewingIssuanceQty) SewingIssuanceQty
+            from 
+            [dbo].[DataForCuttingWIP] cw
+            Left Join WorkOrderGroup WOG 
+            on cw.WorkOrder = WOG.WorkOrder and cw.BuyMonth = WOG.BuyMonth and cw.CustomerCode = WOG.CustomerCode
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND cw.[CuttingOutDate] &gt;= {0}</template>
+            <template name="EndDate">AND cw.[CuttingOutDate] &lt;= {0}</template>
+            <template name="Companies">AND cw.[OrderCompanyID] IN ({0})</template>
+            <template name="BuyMonths">AND cw.[Buymonth] IN ({0})</template>
+            <template name="WorkOrders">AND cw.[WorkOrder] IN ({0})</template>
+            <template name="POs">AND cw.[PO] IN ({0})</template>
+            <template name="StyleNos">AND cw.[StyleNo] IN ({0})</template>
+            <template name="Colors">AND cw.[Color] IN ({0})</template>
+            <template name="ColorCodes">AND cw.[ColorCode] IN ({0})</template>
+            <template name="Sizes">AND cw.[Size] IN ({0})</template>
+            <template name="CustomerCodes">AND cw.[CustomerCode] IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            Group By cw.WorkOrder,cw.BuyMonth,cw.CustomerCode, isnull(CompanyId,'NCL'),WOG.OrderQty
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/CuttingReports/CuttingWorkOrderWIP.rpt</reportPath>
+    </Report>
+
+    <Report name="CuttingBundleWiseDetail">
+        <query>
+            <![CDATA[
+            Select [CuttingOutDate],CompanyID, Buymonth, WorkOrder, StyleNo, PO, ColorCode,Color,
+               Size,CutNo,LineCode,BundleCode, Sum([BundleQuantity]) as CutQty
+            From [dbo].[CuttingIssuanceDataSet]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [CuttingOutDate] &gt;= {0}</template>
+            <template name="EndDate">AND [CuttingOutDate] &lt;= {0}</template>
+            <template name="Companies">AND [CompanyID] IN ({0})</template>
+            <template name="BuyMonths">AND [Buymonth] IN ({0})</template>
+            <template name="WorkOrders">AND [WorkOrder] IN ({0})</template>
+            <template name="POs">AND [PO] IN ({0})</template>
+            <template name="CutNos">AND [CutNo] IN ({0})</template>
+            <template name="StyleNos">AND [StyleNo] IN ({0})</template>
+            <template name="Colors">AND [Color] IN ({0})</template>
+            <template name="ColorCodes">AND [ColorCode] IN ({0})</template>
+            <template name="Sizes">AND [Size] IN ({0})</template>
+            <template name="LineCodes">AND [LineCode] IN ({0})</template>
+            <template name="BundleCodes">AND [BundleCode] IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            GROUP BY [CuttingOutDate],CompanyID, Buymonth, WorkOrder, StyleNo, PO, ColorCode,Color,
+               Size,CutNo,LineCode,BundleCode
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/CuttingReports/CuttingBundleWiseDetail.rpt</reportPath>
+    </Report>
+
+    <Report name="CuttingDateWiseCutting">
+        <query>
+            <![CDATA[
+            Select [CuttingOutDate], CompanyID, Buymonth, WorkOrder, StyleNo, PO, ColorCode, Color,
+               Size, CutNo, BundleCode, Sum([BundleQuantity]) as CutQty
+            From [dbo].[CuttingIssuanceDataSet]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [CuttingOutDate] &gt;= {0}</template>
+            <template name="EndDate">AND [CuttingOutDate] &lt;= {0}</template>
+            <template name="Companies">AND [CompanyID] IN ({0})</template>
+            <template name="BuyMonths">AND [Buymonth] IN ({0})</template>
+            <template name="WorkOrders">AND [WorkOrder] IN ({0})</template>
+            <template name="POs">AND [PO] IN ({0})</template>
+            <template name="CutNos">AND [CutNo] IN ({0})</template>
+            <template name="StyleNos">AND [StyleNo] IN ({0})</template>
+            <template name="Colors">AND [Color] IN ({0})</template>
+            <template name="ColorCodes">AND [ColorCode] IN ({0})</template>
+            <template name="Sizes">AND [Size] IN ({0})</template>
+            <template name="BundleCodes">AND [BundleCode] IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            GROUP BY [CuttingOutDate], CompanyID, Buymonth, WorkOrder, StyleNo, PO, ColorCode, Color,
+               Size, CutNo, BundleCode
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/CuttingReports/CuttingDateWiseCutting.rpt</reportPath>
+    </Report>
+
+    <!-- Efficiency Reports -->
+
+    <Report name="BoxMaintenanceReport">
+        <query>
+            <![CDATA[
+            SELECT 
+                CompanyID,
+                NodeName,
+                NodeIP,
+                BoxID,
+                BoxCode,
+                CurrentAddress,
+                ZoneTopic,
+                LineID,
+                LineCode,
+                MachineCode,
+                MachineDescription,
+                WorkerID,
+                WorkerCode,
+                WorkerDescription,
+                BoxStatus,
+                DownReasonSubCategoryID,
+                DownCategoryName,
+                SubCategoryName,
+                Remarks,
+                CreatedAt,
+                MaintenanceStartedAt,
+                UpdatedAt,
+                CASE 
+                    WHEN CreatedAt = UpdatedAt AND BoxStatus != 'Running' THEN DATEDIFF(MINUTE, CreatedAt, GETDATE())
+                    ELSE DATEDIFF(MINUTE, CreatedAt, UpdatedAt)
+                END AS NewDownTime,
+                PingTime,
+                DownTime,
+                CASE 
+                    WHEN CreatedAt = UpdatedAt AND BoxStatus != 'Running' THEN GETDATE()
+                    ELSE UpdatedAt
+                END AS MaintenanceTime,
+                MinutesSinceUpdate,
+                BoxState
+            FROM 
+                [Reports].[BoxMaintenanceLog]
+            WHERE 
+                1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND CAST(PingTime AS DATE) &gt;= {0}</template>
+            <template name="EndDate">AND CAST(PingTime AS DATE) &gt;= {0}</template>
+            <template name="Lines">AND LineCode IN ({0})</template>
+            <template name="BoxID">AND BoxID = {0}</template>
+            <template name="DownCategoryName">AND DownCategoryName IN ({0})</template>
+            <template name="BoxStatus">AND BoxStatus IN ({0})</template>
+            <template name="Companies">AND CompanyID IN ({0})</template>
+            <template name="Branches">AND BrId IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/EfficiencyReports/BoxMaintenanceReport.rpt</reportPath>
+    </Report>
+
+    <Report name="BundleTrackingReport">
+        <query>
+            <![CDATA[
+            SELECT 
+                CompanyId,
+                StyleNo,
+                PO,
+                CutNo,
+                BundleID,
+                BundleCode,
+                BundleQuantity,
+                LineCode,
+                CuttingDate,
+                InductionDate,
+                QualityPassDate,
+                SendDownDate,
+                FinishingQualityPassDate
+            FROM 
+                [dbo].[BundleWiseMissingOperationData]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND CuttingDate &gt;= {0}</template>
+            <template name="EndDate">AND CuttingDate &lt;= {0}</template>
+            <template name="Companies">AND CompanyId IN ({0})</template>
+            <template name="Lines">AND LineCode IN ({0})</template>
+            <template name="StyleNos">AND StyleNo IN ({0})</template>
+            <template name="POs">AND PO IN ({0})</template>
+            <template name="CutNos">AND CutNo IN ({0})</template>
+            <template name="BundleCodes">AND BundleCode IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/EfficiencyReports/BundleTrackingReport.rpt</reportPath>
+    </Report>
+
+    <Report name="MachineDetailsReport">
+        <query>
+            <![CDATA[
+            SELECT 
+                [MachineType],
+                [MachineCode],
+                [MachineDescription],
+                [LineID],
+                ISNULL([LineCode], 'Line Unassigned') AS LineCode,
+                [LineDescription],
+                [CompanyId],
+                [BrId],
+                ISNULL([BoxID], 00) AS BoxID,
+                ISNULL([ZoneTopic], 'Zone Unassigned') AS ZoneTopic
+            FROM 
+                [dbo].[MachineDetails]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="Companies">AND [CompanyID] IN ({0})</template>
+            <template name="Branches">AND [BrId] IN ({0})</template>
+            <template name="Lines">AND [LineCode] IN ({0})</template>
+            <template name="MachineCodes">AND [MachineCode] IN ({0})</template>
+            <template name="MachineTypes">AND [MachineType] IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/EfficiencyReports/MachineDetailsReport.rpt</reportPath>
+    </Report>
+
+    <Report name="OperationWise480Mins">
+        <query>
+            <![CDATA[
+            SELECT 
+                [ScanID],
+                [WorkerID],
+                [WorkerCode],
+                [WorkerDescription],
+                [LineID],
+                [LineCode],
+                [LineDescription],
+                [OperationID],
+                [OperationDescription],
+                [ProducedPieces],
+                [SMV],
+                [EarnedMinutes],
+                [ScanningDate],
+                [LogInDate],
+                [LastBundleScanTime],
+                [LogInTime],
+                CAST(@ShiftTime AS INT) AS ShiftTime
+            FROM 
+                [dbo].[WorkerEfficiencyDataSet]
+            WHERE 1=1
+            ]]>
+        </query>
+        <parameters>
+            <parameter name="ShiftTime" type="int" />
+        </parameters>
+        <whereClauseTemplates>
+            <template name="ScanningDate">AND [ScanningDate] = {0}</template>
+            <template name="LineCode">AND [LineCode] = {0}</template>
+            <template name="WorkerCodes">AND [WorkerCode] IN ({0})</template>
+            <template name="OperationCodes">AND [OperationID] IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/EfficiencyReports/OperationWise480Mins.rpt</reportPath>
+    </Report>
+
+    <Report name="OperationWiseMissing">
+        <query>
+            <![CDATA[
+            SELECT 
+                ScanningDate AS CreatedAtDate,
+                LineCode,
+                StyleNo AS StyleTemplateID,
+                OperationID,
+                OperationDescription AS OperationName,
+                OpSeq,
+                ISNULL(WorkerCode, 'N/A') AS WorkerCode,
+                ISNULL(WorkerDescription, 'N/A') AS WorkerDescription,
+                DepartmentName,
+                IsFirst,
+                IsLast,
+                SUM(ScannedQty) AS Qty
+            FROM 
+                [dbo].[OperationWiseScanning]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND ScanningDate &gt;= {0}</template>
+            <template name="EndDate">AND ScanningDate &lt;= {0}</template>
+            <template name="OperationNames">AND OperationDescription IN ({0})</template>
+            <template name="StyleNos">AND StyleNo IN ({0})</template>
+            <template name="Lines">AND LineCode IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            GROUP BY
+                ScanningDate,
+                LineCode,
+                StyleNo,
+                OperationID,
+                OperationDescription,
+                DepartmentName,
+                WorkerCode,
+                WorkerDescription,
+                OpSeq,
+                IsFirst,
+                IsLast
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/EfficiencyReports/OperationWiseMissing.rpt</reportPath>
+    </Report>
+
+    <Report name="OperationWiseScanning">
+        <query>
+            <![CDATA[
+            SELECT 
+                ScanningDate AS CreatedAtDate,
+                LineCode,
+                StyleNo AS StyleTemplateID,
+                OperationID,
+                OperationDescription AS OperationName,
+                OpSeq,
+                ISNULL(WorkerCode, 'N/A') AS WorkerCode,
+                ISNULL(WorkerDescription, 'N/A') AS WorkerDescription,
+                DepartmentName,
+                IsFirst,
+                IsLast,
+                SUM(ScannedQty) AS Qty
+            FROM 
+                [dbo].[OperationWiseScanning]
+            WHERE 1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND ScanningDate &gt;= {0}</template>
+            <template name="EndDate">AND ScanningDate &lt;= {0}</template>
+            <template name="OperationDescriptions">AND OperationDescription IN ({0})</template>
+            <template name="StyleNos">AND StyleNo IN ({0})</template>
+            <template name="Lines">AND LineCode IN ({0})</template>
+        </whereClauseTemplates>
+        <groupBy>
+            <![CDATA[
+            GROUP BY
+                ScanningDate,
+                LineCode,
+                StyleNo,
+                OperationID,
+                OperationDescription,
+                DepartmentName,
+                WorkerCode,
+                WorkerDescription,
+                OpSeq,
+                IsFirst,
+                IsLast
+            ]]>
+        </groupBy>
+        <reportPath>~/CrystalReports/EfficiencyReports/OperationWiseScanning.rpt</reportPath>
+    </Report>
+
+    <Report name="SAMCalculationReport">
+        <query>
+            <![CDATA[
+            WITH CTE_Worker AS
+            (
+                SELECT 
+                    CompanyId,
+                    BrId,
+                    WorkerCode,
+                    WorkerDescription,
+                    LoginDate,
+                    DepartmentName,
+                    MIN(LoginTime) AS EntryTime,
+                    MAX(LastBundleScanTime) AS ExitTime
+                FROM 
+                    [dbo].[WorkerEfficiencyDataSet]
+                WHERE 1=1
+                GROUP BY 
+                CompanyId,
+                BrId,
+                WorkerCode,
+                WorkerDescription,
+                LoginDate,
+                DepartmentName
+            )
+            SELECT 
+                CompanyId,
+                BrId,
+                WorkerCode,
+                WorkerDescription,
+                DepartmentName,
+                LoginDate, 
+                EntryTime, 
+                ExitTime,
+                CAST(DATEDIFF(MINUTE, EntryTime, ExitTime) AS DECIMAL(10,2)) / 60 AS HoursWorked,
+                CASE 
+                    WHEN DATENAME(WEEKDAY, LoginDate) = 'Friday' THEN 
+                        CAST(DATEDIFF(MINUTE, EntryTime, ExitTime) AS DECIMAL(10,2)) / 60 
+                    ELSE 
+                        0 
+                END AS FridayHours,
+                DATEDIFF(MINUTE, EntryTime, ExitTime) AS AvailableSAM,
+                CASE 
+                    WHEN DATEPART(HOUR, ExitTime) > @LastHour 
+                            OR (DATEPART(HOUR, ExitTime) = @LastHour AND DATEPART(MINUTE, ExitTime) > 0) 
+                    THEN CAST(DATEDIFF(MINUTE, DATEADD(MINUTE, @LastHour * 60, CAST(CONVERT(DATE, LoginDate) AS DATETIME)), ExitTime) AS DECIMAL(10,2)) / 60
+                    ELSE 0 
+                END AS OvertimeHours,
+                CASE 
+                    WHEN DATEPART(HOUR, ExitTime) < @LastHour  
+                    THEN CAST(DATEDIFF(MINUTE, EntryTime, ExitTime) AS DECIMAL(10,2)) / 60
+                    ELSE CAST(DATEDIFF(MINUTE, EntryTime, DATEADD(HOUR, @LastHour, CAST(CAST(EntryTime AS DATE) AS DATETIME))) AS DECIMAL(10,2)) / 60 
+                END AS PreOvertimeHours
+            FROM 
+                CTE_Worker
+            ]]>
+        </query>
+        <parameters>
+            <parameter name="LastHour" type="int" />
+        </parameters>
+        <whereClauseTemplates>
+            <template name="StartDate">AND LoginDate &gt;= {0}</template>
+            <template name="EndDate">AND LoginDate &lt;= {0}</template>
+            <template name="Companies">AND CompanyId IN ({0})</template>
+            <template name="Branches">AND BrId IN ({0})</template>
+            <template name="WorkerCodes">AND WorkerCode IN ({0})</template>
+            <template name="DepartmentNames">AND DepartmentName IN ({0})</template>
+        </whereClauseTemplates>
+        
+        <reportPath>~/CrystalReports/EfficiencyReports/SAMCalculationReport.rpt</reportPath>
+    </Report>
+
+    <Report name="WorkerStrengthReport">
+        <query>
+            <![CDATA[
+            SELECT 
+                [BRID],
+                [DepartmentDescription],
+                [Designation],
+                [InDate],
+                COUNT([EmpCode]) AS TotalWorkers,
+                SUM(CASE WHEN [AttendanceCode] = 'P' THEN 1 ELSE 0 END) AS TotalPresent,
+                SUM(CASE WHEN [AttendanceCode] = 'A' THEN 1 ELSE 0 END) AS TotalAbsent
+            FROM 
+                [dbo].[WorkerAttendance]
+            WHERE 1=1
+            GROUP BY 
+                [BRID],
+                [DepartmentDescription],
+                [Designation],
+                [InDate]
+            ORDER BY 
+                [BRID], 
+                [DepartmentDescription], 
+                [Designation]
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [InDate] &gt;= {0}</template>
+            <template name="EndDate">AND [InDate] &lt;= {0}</template>
+            <template name="DepartmentDescriptions">AND [DepartmentDescription] IN ({0})</template>
+            <template name="Branches">AND [BRID] IN ({0})</template>
+            <template name="WorkerCodes">AND [EmpCode] IN ({0})</template>
+        </whereClauseTemplates>
+        
+        <reportPath>~/CrystalReports/EfficiencyReports/WorkerStrengthReport.rpt</reportPath>
+    </Report>
+
+    <!-- Quality Reports -->
+
+    <Report name="QualityCheckReport">
+        <query>
+            <![CDATA[
+            SELECT 
+                OrId,
+                PO,
+                CutNo,
+                BundleCode,
+                Buyer,
+                PieceID,
+                PieceNumber,
+                LineID,
+                LineCode,
+                LineDescription,
+                StatusDescription,
+                UserName,
+                CONVERT(VARCHAR(10), ScanningDate, 103) AS ScanningDate
+            FROM 
+                dbo.QualityDataSet
+            WHERE 
+                1=1
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [ScanningDate] &gt;= {0}</template>
+            <template name="EndDate">AND [ScanningDate] &lt;= {0}</template>
+            <template name="Companies">AND [CompanyID] IN ({0})</template>
+            <template name="Lines">AND [Line] IN ({0})</template>
+            <template name="WorkOrders">AND [OrId] IN ({0})</template>
+            <template name="StyleNos">AND [StyleNo] IN ({0})</template>
+            <template name="Colors">AND [Color] IN ({0})</template>
+            <template name="Sizes">AND [Size] IN ({0})</template>
+            <template name="QualityCheckers">AND [QualityChecker] IN ({0})</template>
+            <template name="FaultTypes">AND [FaultType] IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/QualityReports/QualityCheckReport.rpt</reportPath>
+    </Report>
+
+    <Report name="InlineRFTReport">
+        <query>
+            <![CDATA[
+            WITH CTE_Audit AS
+            (
+                SELECT 
+                    FORMAT(ScanningTime, 'yyyy-MM') AS Month,
+                    LineCode,
+                    WorkerID,
+                    WorkerCode,
+                    WorkerDescription,
+                    COUNT(AuditFormSessionID) AS TotalRounds,
+                    COUNT(CASE WHEN RoundColor = 'Green' THEN AuditFormSessionID END) AS GreenCount,
+                    COUNT(CASE WHEN RoundColor <> 'Green' OR RoundColor IS NULL THEN AuditFormSessionID END) AS NotGreenCount
+                FROM [dbo].[AuditFormDataSet]
+                WHERE 1=1
+                GROUP BY FORMAT(ScanningTime, 'yyyy-MM'), LineCode, WorkerID, WorkerCode, WorkerDescription
+            )
+            SELECT 
+                Month,
+                LineCode,
+                WorkerID,
+                WorkerCode,
+                WorkerDescription,
+                TotalRounds,
+                GreenCount,
+                NotGreenCount,
+                CASE 
+                    WHEN TotalRounds = 0 THEN 0
+                    ELSE CAST(GreenCount * 100.0 / TotalRounds AS DECIMAL(5,2))
+                END AS RFT_Percentage,
+                CASE 
+                    WHEN TotalRounds = 0 THEN 'No Data'
+                    WHEN (GreenCount * 100.0 / TotalRounds) = 100 THEN 'RFT Operator 0%'
+                    WHEN (GreenCount * 100.0 / TotalRounds) BETWEEN 95 AND 99.99 THEN '1% - 5% Excellent'
+                    WHEN (GreenCount * 100.0 / TotalRounds) BETWEEN 90 AND 94.99 THEN '6% - 10% Good'
+                    WHEN (GreenCount * 100.0 / TotalRounds) BETWEEN 85 AND 89.99 THEN '11% - 15% Satisfactory'
+                    WHEN (GreenCount * 100.0 / TotalRounds) < 85 THEN '16% & Above Need Improvement'
+                    ELSE 'Unknown'
+                END AS RFT_Category
+            FROM CTE_Audit
+            ORDER BY Month, LineCode
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [ScanningTime] &gt;= {0}</template>
+            <template name="EndDate">AND [ScanningTime] &lt;= {0}</template>
+            <template name="Companies">AND [CompanyID] IN ({0})</template>
+            <template name="Lines">AND [LineCode] IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/QualityReports/InlineRFTReport.rpt</reportPath>
+    </Report>
+
+    <Report name="HourlyProductionEndline">
+        <query>
+            <![CDATA[
+            WITH HourlyProduction AS (
+                SELECT
+                    LineCode,
+                    SectionCode,
+                    SectionDescription,
+                    ScanningDate AS ProductionDate,
+                    HourSlot,
+                    COUNT(CASE WHEN StatusDescription = 'FTQ' THEN PieceID ELSE NULL END) AS FTQ,
+                    COUNT(CASE WHEN StatusDescription = 'Passed/Defected' THEN PieceID ELSE NULL END) AS ClearedAfterRework
+                FROM dbo.QualityDataSet
+                WHERE 1=1
+                GROUP BY 
+                    LineCode,
+                    SectionCode,
+                    SectionDescription,
+                    ScanningDate,
+                    HourSlot
+            )
+            SELECT
+                LineCode,
+                SectionCode,
+                SectionDescription,
+                ProductionDate,
+                HourSlot AS HourOrder,
+                CASE
+                    WHEN HourSlot BETWEEN 6 AND 16 THEN CONCAT(HourSlot, ':00')
+                    ELSE 'Overtime'  
+                END AS HourSlot,
+                (FTQ + ClearedAfterRework) AS PieceCount
+            FROM HourlyProduction
+            ORDER BY
+                HourOrder
+            ]]>
+        </query>
+        <whereClauseTemplates>
+            <template name="StartDate">AND [ScanningDate] &gt;= {0}</template>
+            <template name="EndDate">AND [ScanningDate] &lt;= {0}</template>
+            <template name="Companies">AND [CompanyId] IN ({0})</template>
+            <template name="Branches">AND [BrId] IN ({0})</template>
+            <template name="WorkOrders">AND [OrId] IN ({0})</template>
+            <template name="POs">AND [PO] IN ({0})</template>
+            <template name="BuyMonths">AND [BuyMonth] IN ({0})</template>
+            <template name="StyleNos">AND [StyleNo] IN ({0})</template>
+            <template name="Lines">AND [LineCode] IN ({0})</template>
+            <template name="Sections">AND [SectionCode] IN ({0})</template>
+        </whereClauseTemplates>
+        <reportPath>~/CrystalReports/QualityReports/HourlyProductionEndline.rpt</reportPath>
+    </Report>
+</ReportQueries>
