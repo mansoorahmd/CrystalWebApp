@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Serialization;
-using CrystalWebApp.Models;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -10,6 +9,7 @@ using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using CrystalWebApp.Utilities;
 using System.Data;
+using SharedServices.Models;
 
 namespace CrystalWebApp.Controllers
 {

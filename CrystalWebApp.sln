@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalWebApp", "CrystalWebApp.csproj", "{C5AE7B37-B755-460F-8B2B-A9A0C286692E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalReportApp", "..\CrystalReportApp\CrystalReportApp.csproj", "{E8171F50-F3F9-41F1-B363-BD18BA637BA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedServices", "..\SharedServices\SharedServices.csproj", "{1F93B76C-16B9-43E0-8DC0-F93B6CB36F82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{C5AE7B37-B755-460F-8B2B-A9A0C286692E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5AE7B37-B755-460F-8B2B-A9A0C286692E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5AE7B37-B755-460F-8B2B-A9A0C286692E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8171F50-F3F9-41F1-B363-BD18BA637BA1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{E8171F50-F3F9-41F1-B363-BD18BA637BA1}.Debug|Any CPU.Build.0 = Debug|x86
+		{E8171F50-F3F9-41F1-B363-BD18BA637BA1}.Release|Any CPU.ActiveCfg = Release|x86
+		{E8171F50-F3F9-41F1-B363-BD18BA637BA1}.Release|Any CPU.Build.0 = Release|x86
+		{1F93B76C-16B9-43E0-8DC0-F93B6CB36F82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F93B76C-16B9-43E0-8DC0-F93B6CB36F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F93B76C-16B9-43E0-8DC0-F93B6CB36F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F93B76C-16B9-43E0-8DC0-F93B6CB36F82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

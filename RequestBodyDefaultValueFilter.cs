@@ -2,9 +2,9 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.OpenApi.Any;
 using System.Linq;
-using CrystalWebApp.Models; // Add using for FilterSelection
 using System.Reflection;
-using System.ComponentModel; // Add using for DefaultValueAttribute
+using System.ComponentModel;
+using SharedServices.Models; // Add using for DefaultValueAttribute
 
 namespace CrystalWebApp
 {
